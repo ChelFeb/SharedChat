@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -15,9 +16,6 @@ public class StreamHandler implements Runnable {
 
     static {
         chatData = new TreeMap<Long, String>();
-        chatData.put(2232L, "Message 1");
-        chatData.put(32323L, "Message 2");
-        chatData.put(42345324L, "Message 3");
     }
 
     public StreamHandler(Socket s) throws IOException {
@@ -29,7 +27,7 @@ public class StreamHandler implements Runnable {
     @Override
     public void run() {
         try {
-            readInputHeaders();
+            addMessage(readInputMessage());
             writeResponse(generateHtmlTable(chatData));
         } catch (Throwable t) {
                 /*do nothing*/
@@ -59,7 +57,7 @@ public class StreamHandler implements Runnable {
     /*
         Метод Получает html из диска, добавляет в таблицу данный из map
      */
-    public String generateHtmlTable(Map<Long, String> map) {
+    public String generateHtmlTable(Map<Long, String> map) throws Throwable {
         String html = readHtmlFromDisk();
         StringBuffer sb = new StringBuffer(html);
         Iterator it = map.entrySet().iterator();
@@ -68,10 +66,9 @@ public class StreamHandler implements Runnable {
             pairs.getKey();
             pairs.getValue();
             sb.append("<tr><td>");
-            sb.append(pairs.getKey());
+            sb.append(new Date((Long) pairs.getKey()));
             sb.append("</td><td>");
             sb.append(pairs.getValue());
-            ;
             sb.append("</td></tr>");
         }
         sb.append("</table></body></html>");
@@ -91,14 +88,35 @@ public class StreamHandler implements Runnable {
         os.flush();
     }
 
-    //читаем HTTP запрос
-    private void readInputHeaders() throws Throwable {
+    //Парсим Http запрос, вытаскиваем с него message
+    private String readInputMessage() throws Throwable {
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        StringBuffer sb = new StringBuffer();
         while (true) {
             String s = br.readLine();
+            sb.append(s);
             if (s == null || s.trim().length() == 0) {
                 break;
             }
         }
+
+        String out = "";
+        for (int i = 0; i < sb.length(); i++) {
+            if (sb.charAt(i) == '=') {
+                while (sb.charAt(i) != 'H' & sb.charAt(i + 1) != 'T' & sb.charAt(i + 2) != 'T' & sb.charAt(i + 3) != 'P') {
+                    if (sb.charAt(i + 1) == '+'){
+                        sb.setCharAt(i + 1, ' ');
+                    }
+                    out += sb.charAt(i + 1);
+                    i++;
+                }
+                break;
+            }
+        }
+        return out;
+    }
+
+    public void addMessage(String msg) {
+        chatData.put(new Date().getTime(), msg);
     }
 }
