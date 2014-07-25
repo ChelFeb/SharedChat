@@ -49,7 +49,7 @@ public class StreamHandler implements Runnable {
     }
 
     public String readHtmlFromDisk() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         try {
             FileInputStream fis = new FileInputStream(new File(PATH_TO_HTML));
             while (fis.available() > 0) {
@@ -66,7 +66,7 @@ public class StreamHandler implements Runnable {
      */
     public String generateHtmlTable(Map<Long, String> map) throws Throwable {
         String html = readHtmlFromDisk();
-        StringBuffer sb = new StringBuffer(html);
+        StringBuilder sb = new StringBuilder(html);
         Iterator it = map.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry pairs = (Map.Entry) it.next();
@@ -102,7 +102,7 @@ public class StreamHandler implements Runnable {
     //Парсим Http запрос, вытаскиваем с него message
     private String readInputMessage() throws Throwable {
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while (true) {
             String s = br.readLine();
             sb.append(s);
@@ -111,7 +111,7 @@ public class StreamHandler implements Runnable {
             }
         }
 
-        StringBuffer out = new StringBuffer();
+        StringBuilder out = new StringBuilder();
         for (int i = 0; i < sb.length(); i++) {
             if (sb.charAt(i) == '=') {
                 while (sb.charAt(i) != 'H' & sb.charAt(i + 1) != 'T' & sb.charAt(i + 2) != 'T' & sb.charAt(i + 3) != 'P') {
