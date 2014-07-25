@@ -11,7 +11,7 @@ public class HttpServer {
             //метод accept заставляет программу ждать подключений по указаному порту
             //после успешного подключения создается Socket объект
             Socket s = serverSocket.accept();
-            System.err.println("Client accepted");
+//            System.err.println("Client accepted");
             // Создаем и запускаем новый поток, реализация в методе run класса SocketProcessor
             new Thread(new StreamHandler(s)).start();
         }

@@ -9,6 +9,7 @@ public class StreamHandler implements Runnable {
     private static final String PATH_TO_HTML = "/home/chelfeb/IdeaProjects/SharedChatProject/chat.html";
     private static final String PATH_TO_DATA = "/home/chelfeb/IdeaProjects/SharedChatProject/chat.data";
 
+    private int streamNumber;
     private Socket s;
     private InputStream is;
     private OutputStream os;
@@ -19,6 +20,8 @@ public class StreamHandler implements Runnable {
     }
 
     public StreamHandler(Socket s) throws IOException {
+        streamNumber++;
+        System.err.println("Stream " + streamNumber + " have run");
         this.s = s;
         this.is = s.getInputStream();
         this.os = s.getOutputStream();
@@ -29,16 +32,21 @@ public class StreamHandler implements Runnable {
         try {
             addMessage(readInputMessage());
             writeResponse(generateHtmlTable(chatData));
+            while (true) {
+                Thread.sleep(2000);
+                refreshChat();
+            }
         } catch (Throwable t) {
                 /*do nothing*/
-        } finally {
-            try {
-                s.close();
-            } catch (Throwable t) {
-                    /*do nothing*/
-            }
         }
-        System.err.println("Client processing finished");
+//        finally {
+//            try {
+//                s.close();
+//            } catch (Throwable t) {
+//                    /*do nothing*/
+//            }
+//        }
+        System.err.println("Stream " + streamNumber + ", have finished");
     }
 
     public String readHtmlFromDisk() {
@@ -55,7 +63,7 @@ public class StreamHandler implements Runnable {
     }
 
     /*
-        Метод Получает html из диска, добавляет в таблицу данный из map
+        Метод Получает html из диска, добавляет в таблицу данные из map
      */
     public String generateHtmlTable(Map<Long, String> map) throws Throwable {
         String html = readHtmlFromDisk();
@@ -86,6 +94,10 @@ public class StreamHandler implements Runnable {
         String result = response + s;
         os.write(result.getBytes());
         os.flush();
+    }
+
+    private void refreshChat() throws Throwable {
+        writeResponse(generateHtmlTable(chatData));
     }
 
     //Парсим Http запрос, вытаскиваем с него message
