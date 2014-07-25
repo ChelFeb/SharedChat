@@ -6,10 +6,10 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class StreamHandler implements Runnable {
-    private static final String PATH_TO_HTML = "/home/chelfeb/IdeaProjects/SharedChatProject/chat.html";
-    private static final String PATH_TO_DATA = "/home/chelfeb/IdeaProjects/SharedChatProject/chat.data";
 
-    private int streamNumber;
+    private static final String PATH_TO_HTML = "./chat.html";
+    private static final String PATH_TO_DATA = "./chat.data";
+
     private Socket s;
     private InputStream is;
     private OutputStream os;
@@ -20,8 +20,6 @@ public class StreamHandler implements Runnable {
     }
 
     public StreamHandler(Socket s) throws IOException {
-        streamNumber++;
-        System.err.println("Stream " + streamNumber + " have run");
         this.s = s;
         this.is = s.getInputStream();
         this.os = s.getOutputStream();
@@ -29,6 +27,7 @@ public class StreamHandler implements Runnable {
 
     @Override
     public void run() {
+        System.err.println("Stream " + Thread.currentThread().getName() + " have run");
         try {
             addMessage(readInputMessage());
             writeResponse(generateHtmlTable(chatData));
@@ -39,14 +38,14 @@ public class StreamHandler implements Runnable {
         } catch (Throwable t) {
                 /*do nothing*/
         }
-//        finally {
-//            try {
-//                s.close();
-//            } catch (Throwable t) {
-//                    /*do nothing*/
-//            }
-//        }
-        System.err.println("Stream " + streamNumber + ", have finished");
+        finally {
+            try {
+                s.close();
+            } catch (Throwable t) {
+                    /*do nothing*/
+            }
+        }
+        System.err.println("Stream " + Thread.currentThread().getName() + " have finished");
     }
 
     public String readHtmlFromDisk() {
@@ -112,20 +111,20 @@ public class StreamHandler implements Runnable {
             }
         }
 
-        String out = "";
+        StringBuffer out = new StringBuffer();
         for (int i = 0; i < sb.length(); i++) {
             if (sb.charAt(i) == '=') {
                 while (sb.charAt(i) != 'H' & sb.charAt(i + 1) != 'T' & sb.charAt(i + 2) != 'T' & sb.charAt(i + 3) != 'P') {
                     if (sb.charAt(i + 1) == '+'){
                         sb.setCharAt(i + 1, ' ');
                     }
-                    out += sb.charAt(i + 1);
+                    out.append(sb.charAt(i + 1));
                     i++;
                 }
                 break;
             }
         }
-        return out;
+        return out.toString();
     }
 
     public void addMessage(String msg) {
